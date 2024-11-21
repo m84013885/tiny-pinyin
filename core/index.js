@@ -1,9 +1,9 @@
-const LATIN = 1 // 拉丁字符类型
-const PINYIN = 2 // 拼音字符类型
-const UNKNOWN = 3 // 未知字符类型
+const LATIN = 1; // 拉丁字符类型
+const PINYIN = 2; // 拼音字符类型
+const UNKNOWN = 3; // 未知字符类型
 
-const FIRST_PINYIN_UNIHAN = '\u963F' // 拼音范围的第一个汉字
-const LAST_PINYIN_UNIHAN = '\u9FFF' // 拼音范围的最后一个汉字
+const FIRST_PINYIN_UNIHAN = '\u963F'; // 拼音范围的第一个汉字
+const LAST_PINYIN_UNIHAN = '\u9FFF'; // 拼音范围的最后一个汉字
 
 const UNIHANS = [
     '\u963f', '\u54ce', '\u5b89', '\u80ae', '\u51f9', '\u516b',
@@ -76,7 +76,7 @@ const UNIHANS = [
     '\u4e13', '\u5986', '\u96b9', '\u5b92', '\u5353', '\u4e72',
     '\u5b97', '\u90b9', '\u79df', '\u94bb', '\u539c', '\u5c0a',
     '\u6628', '\u5159'
-]
+];
 
 // 将ASCII数组转换为拼音
 const PINYINS = [
@@ -150,7 +150,7 @@ const PINYINS = [
     'ZHUAN', 'ZHUANG', 'ZHUI', 'ZHUN', 'ZHUO', 'ZI',
     'ZONG', 'ZOU', 'ZU', 'ZUAN', 'ZUI', 'ZUN',
     'ZUO', ''
-]
+];
 
 // 特殊情况的映射，独立于UNIHANS和PINYINS
 const EXCEPTIONS = {
@@ -178,102 +178,96 @@ const EXCEPTIONS = {
     '\u90cd': 'NA',
     '\u828e': 'XIONG',
     '\u8c01': 'SHUI'
-}
-
-interface Token {
-    source: string; // 原始字符
-    type: number;   // 字符类型
-    target: string; // 目标字符或拼音
-}
+};
 
 // 单字拼音
-function getPinyin(ch: string, collator?: Intl.Collator): string {
+function getPinyin(ch, collator) {
     if (!collator) {
-        collator = new Intl.Collator('zh-CN')
+        collator = new Intl.Collator('zh-CN');
     }
-    const token: Token = {
+    const token = {
         source: ch, // 原始字符
         type: UNKNOWN, // 初始化为未知类型
         target: ch // 初始化为原始字符
-    }
+    };
 
     // 首先检查EXCEPTIONS映射，然后在UNIHANS表中搜索
     if (ch in EXCEPTIONS) {
-        token.type = PINYIN // 设置类型为拼音
-        token.target = EXCEPTIONS[ch as keyof typeof EXCEPTIONS] // 使用例外映射的拼音
-        return token.target
+        token.type = PINYIN; // 设置类型为拼音
+        token.target = EXCEPTIONS[ch]; // 使用例外映射的拼音
+        return token.target;
     }
 
-    let offset = -1
-    let cmp
+    let offset = -1;
+    let cmp;
     if (ch.charCodeAt(0) < 256) {
-        token.type = LATIN // 如果是拉丁字符
-        token.target = ch // 目标字符为自身
-        return token.target
+        token.type = LATIN; // 如果是拉丁字符
+        token.target = ch; // 目标字符为自身
+        return token.target;
     } else {
-        cmp = collator.compare(ch, FIRST_PINYIN_UNIHAN)
+        cmp = collator.compare(ch, FIRST_PINYIN_UNIHAN);
         if (cmp < 0) {
-            token.type = UNKNOWN // 如果在拼音范围之前
-            token.target = ch
-            return token.target
+            token.type = UNKNOWN; // 如果在拼音范围之前
+            token.target = ch;
+            return token.target;
         } else if (cmp === 0) {
-            token.type = PINYIN // 如果是拼音范围的第一个字符
-            offset = 0
+            token.type = PINYIN; // 如果是拼音范围的第一个字符
+            offset = 0;
         } else {
-            cmp = collator.compare(ch, LAST_PINYIN_UNIHAN)
+            cmp = collator.compare(ch, LAST_PINYIN_UNIHAN);
             if (cmp > 0) {
-                token.type = UNKNOWN // 如果在拼音范围之后
-                token.target = ch
-                return token.target
+                token.type = UNKNOWN; // 如果在拼音范围之后
+                token.target = ch;
+                return token.target;
             } else if (cmp === 0) {
-                token.type = PINYIN // 如果是拼音范围的最后一个字符
-                offset = UNIHANS.length - 1
+                token.type = PINYIN; // 如果是拼音范围的最后一个字符
+                offset = UNIHANS.length - 1;
             }
         }
     }
 
-    token.type = PINYIN
+    token.type = PINYIN;
     if (offset < 0) {
-        let begin = 0
-        let end = UNIHANS.length - 1
+        let begin = 0;
+        let end = UNIHANS.length - 1;
         while (begin <= end) {
-            offset = ~~((begin + end) / 2)
-            let unihan = UNIHANS[offset]
-            cmp = collator.compare(ch, unihan)
+            offset = Math.floor((begin + end) / 2);
+            let unihan = UNIHANS[offset];
+            cmp = collator.compare(ch, unihan);
 
             // 找到匹配的字符
             if (cmp === 0) {
-                break
+                break;
             }
             // 在offset之后搜索
             else if (cmp > 0) {
-                begin = offset + 1
+                begin = offset + 1;
             }
             // 在offset之前搜索
             else {
-                end = offset - 1
+                end = offset - 1;
             }
         }
     }
 
     if (cmp < 0) {
-        offset--
+        offset--;
     }
 
-    token.target = PINYINS[offset] // 获取对应的拼音
+    token.target = PINYINS[offset]; // 获取对应的拼音
     if (!token.target) {
-        token.type = UNKNOWN // 如果没有找到对应的拼音
-        token.target = token.source
+        token.type = UNKNOWN; // 如果没有找到对应的拼音
+        token.target = token.source;
     }
-    return token.target
+    return token.target;
 }
 
 // 多字拼音
-function getPinyinForString(input: string, collator?: Intl.Collator): string[] {
+function getPinyinForString(input, collator) {
     if (!collator) {
         collator = new Intl.Collator('zh-CN');
     }
-    const tokens: string[] = [];
+    const tokens = [];
     for (const ch of input) {
         const string = getPinyin(ch, collator);
         tokens.push(string);
@@ -284,4 +278,4 @@ function getPinyinForString(input: string, collator?: Intl.Collator): string[] {
 export {
     getPinyin,
     getPinyinForString
-}
+};

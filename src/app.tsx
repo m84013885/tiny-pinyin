@@ -6,7 +6,7 @@ export function App() {
 
   const pinyin = useMemo(() => {
     const tokens = getPinyinForString(value)
-    return tokens.map(token => token.target).join(' ')
+    return tokens.map(token => token).join(' ')
   }, [value])
 
   return (

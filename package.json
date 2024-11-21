@@ -1,6 +1,5 @@
 {
-  "name": "tiny-pinyin",
-  "private": true,
+  "name": "tiny-pinyin-mw",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -23,10 +22,15 @@
     "url": "git+https://github.com/m84013885/tiny-pinyin.git"
   },
   "keywords": [
-    "pinyin"
+    "pinyin",
+    "hanzi",
+    "拼音",
+    "汉语",
+    "汉字",
+    "中文"
   ],
-  "author": "Ming",
-  "license": "ISC",
+  "author": "m84013885",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/m84013885/tiny-pinyin/issues"
   },
