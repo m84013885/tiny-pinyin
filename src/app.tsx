@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'preact/hooks'
-import { getPinyinForString } from '../core'
+import { getPinyinForString } from 'tiny-pinyin-mw'
 
 export function App() {
   const [value, setValue] = useState('')
